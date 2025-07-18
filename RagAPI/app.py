@@ -5,13 +5,13 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 # Initialize RAG system once globally (to avoid reloading index on every request)
-rag_system = LocalRAGSystemFAISS(llm_model_name="gemini-2.5-flash-preview-04-17")
+rag_system = LocalRAGSystemFAISS(llm_model_name="gemini-2.5-flash")
 
 # Load or create index and metadata at startup
 rag_system.load_faiss_index_and_metadata(
     faiss_index_path="faiss_index.idx",
     meta_path="meta.json",
-    file_path="RagAPI/common.txt"
+    file_path="C:/Users/sachi/VSCProjects/RagIntegration/RagAPI/common.txt"
 )
 
 # Setup your prompt template once

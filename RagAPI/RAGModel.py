@@ -13,7 +13,7 @@ from sentence_transformers import SentenceTransformer # Added for FAISS embeddin
 load_dotenv() # Load environment variables, including your GOOGLE_API_KEY
 
 class LocalRAGSystemFAISS: # Changed class name to reflect FAISS
-    def __init__(self, llm_model_name: str = "gemini-2.5-flash-preview-04-17"):
+    def __init__(self, llm_model_name: str = "gemini-2.5-flash"):
        
         self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2") # SentenceTransformer for FAISS
         self.conversation_chains = {}
@@ -90,7 +90,7 @@ class LocalRAGSystemFAISS: # Changed class name to reflect FAISS
         print(f"Metadata saved to {meta_path}")
         return faiss_index, {"chunks": metadata_list}
 
-    def load_faiss_index_and_metadata(self, faiss_index_path: str = "faiss_index.idx", meta_path: str = "meta.json", file_path: str = "common.txt"):
+    def load_faiss_index_and_metadata(self, faiss_index_path: str = "faiss_index.idx", meta_path: str = "meta.json", file_path: str = "RagAPI/common.txt"):
     
         if not os.path.exists(faiss_index_path) or not os.path.exists(meta_path):
             self.faiss_index, self.metadata = self._create_and_save_faiss_index(file_path, faiss_index_path, meta_path)
@@ -129,7 +129,7 @@ if __name__ == "__main__":
 
     # --- Step 1: Initialize your RAG system ---
     # This sets up the SentenceTransformer for embeddings and Gemini LLM.
-    rag_system = LocalRAGSystemFAISS(llm_model_name="gemini-2.5-flash-preview-04-17")
+    rag_system = LocalRAGSystemFAISS(llm_model_name="gemini-2.5-flash")
 
     # --- Step 2: Load (or create) the FAISS index and metadata ---
     # This assumes 'faiss_index.idx' and 'meta.json' are in the current directory.
@@ -137,7 +137,7 @@ if __name__ == "__main__":
     rag_system.load_faiss_index_and_metadata(
         faiss_index_path="faiss_index.idx",
         meta_path="meta.json",
-        file_path="common.txt" # Used only if index/meta files don't exist
+        file_path="C:/Users/sachi/VSCProjects/RagIntegration/RagAPI/common.txt" # Used only if index/meta files don't exist
     )
 
     # --- Step 3: Define your specific prompt template ---

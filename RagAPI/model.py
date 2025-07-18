@@ -36,7 +36,7 @@ def get_chain(conversation_id):
             return_messages=True
         )
     return ConversationChain(
-        llm=GoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17"),
+        llm=GoogleGenerativeAI(model="gemini-2.5-flash"),
         memory=memory_store[conversation_id],
         prompt=prompt,
         verbose=False
