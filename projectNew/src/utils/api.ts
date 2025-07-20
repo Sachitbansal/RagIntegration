@@ -4,7 +4,7 @@ import type { APIResponse, UploadResponse } from '../types';
 class APIClient {
   private baseURL: string;
 
-  constructor(baseURL: string = "http://localhost:5001") {
+  constructor(baseURL: string = "https://c8dc3acb16a6.ngrok-free.app/list-sessions") {
     this.baseURL = baseURL;
   }
 
