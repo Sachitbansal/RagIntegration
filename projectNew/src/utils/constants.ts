@@ -1,4 +1,4 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://c8dc3acb16a6.ngrok-free.app/';
 
 export const API_ENDPOINTS = {
   UPLOAD_PDF: '/upload-pdf',

@@ -22,7 +22,7 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
     // Fetch sessions from backend
     const fetchSessions = async () => {
       try {
-        const res = await fetch('http://localhost:5001/list-sessions');
+        const res = await fetch('https://c8dc3acb16a6.ngrok-free.app/list-sessions');
         const data = await res.json();
         if (data.sessions) {
           setSessions(data.sessions.map((id: string) => ({ id, name: id })));
@@ -108,13 +108,13 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
     setIsLoadingSession(true);
     try {
       // Call backend to download session files
-      await fetch('http://localhost:5001/load_session', {
+      await fetch('https://c8dc3acb16a6.ngrok-free.app/load_session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: session.id })
       });
       // Fetch the content of common.txt from the backend (new endpoint)
-      const txtRes = await fetch(`http://localhost:5001/get-common-txt?session_id=${encodeURIComponent(session.id)}`);
+      const txtRes = await fetch(`https://c8dc3acb16a6.ngrok-free.app/get-common-txt?session_id=${encodeURIComponent(session.id)}`);
       const text = await txtRes.text();
       const document: Document = {
         id: session.id,
