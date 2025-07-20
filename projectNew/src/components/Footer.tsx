@@ -8,10 +8,8 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           {/* Creator Attribution */}
           <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-            <span>Created with</span>
-            <Heart className="w-4 h-4 text-red-500 fill-current" />
-            <span>by</span>
-            <span className="font-semibold text-blue-600 dark:text-blue-400">Bolt</span>
+            <span>Created by</span>
+            <span className="font-semibold text-blue-600 dark:text-blue-400">Sachit Bansal</span>
           </div>
 
           {/* Version and Links */}
