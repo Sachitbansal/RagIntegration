@@ -4,7 +4,7 @@ import type { APIResponse, UploadResponse } from '../types';
 class APIClient {
   private baseURL: string;
 
-  constructor(baseURL: string = "https://long-coins-rule.loca.lt/") {
+  constructor(baseURL: string = "http://14.139.34.11:5010") {
     this.baseURL = baseURL;
   }
 

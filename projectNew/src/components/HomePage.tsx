@@ -29,7 +29,7 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
 
   const fetchSessions = async () => {
     try {
-      const res = await fetch('https://long-coins-rule.loca.lt/list-sessions');
+      const res = await fetch('http://14.139.34.11:5010/list-sessions');
       const data = await res.json();
       console.log("Response data:", data);
       if (data.sessions) {
@@ -115,13 +115,13 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
     setIsLoadingSession(true);
     try {
       // Call backend to download session files
-      await fetch('https://long-coins-rule.loca.lt//load_session', {
+      await fetch('http://14.139.34.11:5010/load_session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: session.id })
       });
       // Fetch the content of common.txt from the backend (new endpoint)
-      const txtRes = await fetch(`https://long-coins-rule.loca.lt/get-common-txt?session_id=${encodeURIComponent(session.id)}`);
+      const txtRes = await fetch(`http://14.139.34.11:5010/get-common-txt?session_id=${encodeURIComponent(session.id)}`);
       const text = await txtRes.text();
       const document: Document = {
         id: session.id,
