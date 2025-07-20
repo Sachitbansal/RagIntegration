@@ -18,23 +18,30 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
   const [sessions, setSessions] = useState<{ id: string; name: string }[]>([]);
   const [isLoadingSession, setIsLoadingSession] = useState(false);
 
+
   useEffect(() => {
     // Fetch sessions from backend
-    const fetchSessions = async () => {
-      try {
-        const res = await fetch('https://c8dc3acb16a6.ngrok-free.app/list-sessions');
-        const data = await res.json();
-        if (data.sessions) {
-          setSessions(data.sessions.map((id: string) => ({ id, name: id })));
-        } else {
-          setSessions([]);
-        }
-      } catch {
+  
+    fetchSessions();
+
+    console.log(sessions);
+  }, []);
+
+  const fetchSessions = async () => {
+    try {
+      const res = await fetch('https://long-coins-rule.loca.lt/list-sessions');
+      const data = await res.json();
+      console.log("Response data:", data);
+      if (data.sessions) {
+        setSessions(data.sessions.map((id: string) => ({ id, name: id })));
+      } else {
         setSessions([]);
       }
-    };
-    fetchSessions();
-  }, []);
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setSessions([]);
+    }
+  };
 
   const handleTextSubmit = async () => {
     if (!text.trim()) return;
@@ -108,13 +115,13 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
     setIsLoadingSession(true);
     try {
       // Call backend to download session files
-      await fetch('https://c8dc3acb16a6.ngrok-free.app/load_session', {
+      await fetch('https://long-coins-rule.loca.lt//load_session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: session.id })
       });
       // Fetch the content of common.txt from the backend (new endpoint)
-      const txtRes = await fetch(`https://c8dc3acb16a6.ngrok-free.app/get-common-txt?session_id=${encodeURIComponent(session.id)}`);
+      const txtRes = await fetch(`https://long-coins-rule.loca.lt/get-common-txt?session_id=${encodeURIComponent(session.id)}`);
       const text = await txtRes.text();
       const document: Document = {
         id: session.id,
