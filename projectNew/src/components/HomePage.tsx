@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Upload, FileText, Zap } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
 import { apiClient } from '../utils/api';
@@ -15,6 +15,26 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [sessions, setSessions] = useState<{ id: string; name: string }[]>([]);
+  const [isLoadingSession, setIsLoadingSession] = useState(false);
+
+  useEffect(() => {
+    // Fetch sessions from backend
+    const fetchSessions = async () => {
+      try {
+        const res = await fetch('http://localhost:5001/list-sessions');
+        const data = await res.json();
+        if (data.sessions) {
+          setSessions(data.sessions.map((id: string) => ({ id, name: id })));
+        } else {
+          setSessions([]);
+        }
+      } catch {
+        setSessions([]);
+      }
+    };
+    fetchSessions();
+  }, []);
 
   const handleTextSubmit = async () => {
     if (!text.trim()) return;
@@ -84,15 +104,42 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
     setIsDragging(false);
   };
 
-  if (isUploading) {
+  const handleSessionClick = async (session: { id: string; name: string }) => {
+    setIsLoadingSession(true);
+    try {
+      // Call backend to download session files
+      await fetch('http://localhost:5001/load_session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: session.id })
+      });
+      // Fetch the content of common.txt from the backend (new endpoint)
+      const txtRes = await fetch(`http://localhost:5001/get-common-txt?session_id=${encodeURIComponent(session.id)}`);
+      const text = await txtRes.text();
+      const document: Document = {
+        id: session.id,
+        name: session.name || 'Previous Session',
+        size: text.length,
+        type: 'text',
+        content: text
+      };
+      onDocumentReady(document);
+    } catch (error) {
+      alert('Failed to load session.');
+    } finally {
+      setIsLoadingSession(false);
+    }
+  };
+
+  if (isUploading || isLoadingSession) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 dark:from-gray-900 dark:via-blue-950 dark:to-gray-900">
         <div className="text-center space-y-6">
           <LoadingSpinner 
-            message={uploadProgress > 0 ? `Uploading... ${Math.round(uploadProgress)}%` : "Analyzing document..."} 
+            message={isLoadingSession ? 'Loading session...' : (uploadProgress > 0 ? `Uploading... ${Math.round(uploadProgress)}%` : "Analyzing document...")} 
             size="lg" 
           />
-          {uploadProgress > 0 && (
+          {uploadProgress > 0 && !isLoadingSession && (
             <div className="w-64 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div 
                 className="bg-blue-600 h-2 rounded-full transition-all duration-300"
@@ -124,7 +171,7 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
         </div>
 
         {/* Input Methods */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
           {/* Text Input */}
           <div className="bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg rounded-2xl p-6 border border-white/20 dark:border-gray-700/50">
             <div className="flex items-center space-x-3 mb-4">
@@ -187,6 +234,26 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
             </div>
           </div>
         </div>
+
+        {/* Sessions Card */}
+        {sessions.length > 0 && (
+          <div className="mt-8 mb-8">
+            <div className="bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg rounded-2xl p-6 border border-white/20 dark:border-gray-700/50">
+              <h2 className="text-xl font-semibold text-white mb-4">Older Conversations</h2>
+              <div className="flex flex-wrap gap-3">
+                {sessions.map((session) => (
+                  <button
+                    key={session.id}
+                    onClick={() => handleSessionClick(session)}
+                    className="px-4 py-2 bg-white/5 dark:bg-gray-800/30 hover:bg-white/10 dark:hover:bg-gray-700/50 text-gray-300 text-sm rounded-lg border border-white/10 dark:border-gray-700/50 transition-all duration-200"
+                  >
+                    {session.name || session.id}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="mt-8 text-center">

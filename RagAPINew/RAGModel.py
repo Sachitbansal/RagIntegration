@@ -110,7 +110,11 @@ class LocalRAGSystemFAISS: # Changed class name to reflect FAISS
         # self.faiss_index, self.metadata = "RagAPINew/tmp/testuser123_faiss.idx", "RagAPINew/tmp/testuser123_meta.json"
 
         if self.faiss_index is None or self.metadata is None:
-            raise ValueError("FAISS index or metadata not loaded. Please call `load_faiss_index_and_metadata` first.")
+            self.load_faiss_index_and_metadata(
+                faiss_index_path="RagAPINew/tmp/faiss.idx",
+                meta_path="RagAPINew/tmp/meta.json",
+                file_path="RagAPINew/tmp/common.txt"
+            )
         
         chain = self.get_chain(conversation_id)
 

@@ -107,12 +107,54 @@ def list_sessions():
         result = supabase.storage.from_(SUPABASE_BUCKET).list("", {"limit": 1000})
         
         # Filter folder names (those ending with '/')
-        sessions = [item['name'] for item in result if item['name'].endswith('/')]
+        sessions = [item['name'] for item in result]
 
         return jsonify({"sessions": sessions})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/load_session", methods=["POST"])
+def load_session():
+    data = request.get_json()
+    session_id = data.get("session_id")
+
+    if not session_id:
+        return jsonify({"error": "Missing session_id"}), 400
+
+    try:
+        file_names = ["common.txt", "faiss.idx", "meta.json"]
+        tmp_dir = os.path.join("RagAPINew", "tmp")
+        os.makedirs(tmp_dir, exist_ok=True)
+
+        for file_name in file_names:
+            remote_path = f"{session_id}/{file_name}"
+            local_path = os.path.join(tmp_dir, file_name)
+
+            res = supabase.storage.from_(SUPABASE_BUCKET).download(remote_path)
+            with open(local_path, "wb") as f:
+                f.write(res)
+
+        return jsonify({
+            "message": "Files downloaded successfully",
+            "saved_to": tmp_dir,
+            "files": file_names
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/get-common-txt", methods=["GET"])
+def get_common_txt():
+    # session_id is ignored for local path
+    txt_path = os.path.join("RagAPINew", "tmp", "common.txt")
+    if not os.path.exists(txt_path):
+        return "common.txt not found", 404
+    try:
+        with open(txt_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        return content, 200, {"Content-Type": "text/plain; charset=utf-8"}
+    except Exception as e:
+        return str(e), 500
 
 if __name__ == "__main__":
     app.run(port=5001)

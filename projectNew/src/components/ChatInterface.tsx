@@ -4,6 +4,8 @@ import { LoadingSpinner } from './LoadingSpinner';
 import { apiClient } from '../utils/api';
 import { QUICK_ACTIONS } from '../utils/constants';
 import type { Message, Document } from '../types';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ChatInterfaceProps {
   document: Document;
@@ -85,7 +87,7 @@ export function ChatInterface({ document }: ChatInterfaceProps) {
   };
 
   return (
-    <div className="h-full flex flex-col bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg rounded-2xl border border-white/20 dark:border-gray-700/50 overflow-hidden">
+    <div className="h-full flex flex-col bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg rounded-2xl border border-white/20 dark:border-gray-700/50 overflow-hidden max-h-[80vh]">
       {/* Header */}
       <div className="p-4 border-b border-white/10 dark:border-gray-700/50">
         <div className="flex items-center space-x-3">
@@ -98,7 +100,7 @@ export function ChatInterface({ document }: ChatInterfaceProps) {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[60vh]">
         {messages.length === 0 && showQuickActions && (
           <div className="text-center space-y-4">
             <p className="text-gray-400">Get started with these quick actions:</p>
@@ -139,7 +141,15 @@ export function ChatInterface({ document }: ChatInterfaceProps) {
                   ? 'bg-blue-600 text-white'
                   : 'bg-white/10 dark:bg-gray-700/50 text-gray-100'
               }`}>
-                <p className="text-sm leading-relaxed">{message.content}</p>
+                {message.type === 'ai' ? (
+                  <div className="prose prose-invert max-w-none text-sm leading-relaxed">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {message.content}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <p className="text-sm leading-relaxed">{message.content}</p>
+                )}
                 <div className="flex items-center justify-between mt-2 text-xs opacity-70">
                   <span>{message.timestamp.toLocaleTimeString()}</span>
                   {message.responseTime && (

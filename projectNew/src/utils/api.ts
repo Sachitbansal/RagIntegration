@@ -108,6 +108,8 @@ class APIClient {
     }
   }
 
+  
+
   private generateMockResponse(question: string): string {
     const responses = [
       "Based on the document analysis, here's what I found...",
