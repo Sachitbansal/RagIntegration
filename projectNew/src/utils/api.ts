@@ -4,7 +4,7 @@ import type { APIResponse, UploadResponse } from '../types';
 class APIClient {
   private baseURL: string;
 
-  constructor(baseURL: string = API_BASE_URL) {
+  constructor(baseURL: string = "http://localhost:5001") {
     this.baseURL = baseURL;
   }
 
@@ -52,46 +52,45 @@ class APIClient {
   }
 
   async analyzeText(text: string): Promise<UploadResponse> {
-    // Mock implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          document_id: `text_${Date.now()}`,
-          status: 'success'
-        });
-      }, 1500);
-    });
-
-    // Real implementation would be:
-    // const response = await fetch(`${this.baseURL}${API_ENDPOINTS.ANALYZE_TEXT}`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ text })
-    // });
-    // return response.json();
+    try {
+      const response = await fetch(`${this.baseURL}/upload-text`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      const data = await response.json();
+      if (!response.ok || !data.session_id) {
+        throw new Error(data.error || 'No response from server');
+      }
+      return {
+        document_id: data.session_id,
+        status: 'success'
+      };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to upload text');
+    }
   }
 
-  async sendQuestion(question: string, documentId: string): Promise<APIResponse> {
-    const startTime = Date.now();
-    
-    // Mock implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const responseTime = Date.now() - startTime;
-        resolve({
-          answer: this.generateMockResponse(question),
-          confidence: 0.85 + Math.random() * 0.1
-        });
-      }, 1000 + Math.random() * 2000);
-    });
+  
 
-    // Real implementation would be:
-    // const response = await fetch(`${this.baseURL}${API_ENDPOINTS.CHAT}`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ question, document_id: documentId })
-    // });
-    // return response.json();
+  async sendQuestion(question: string, documentId: string): Promise<APIResponse> {
+    try {
+      const response = await fetch(`${this.baseURL}/query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: question, conversation_id: documentId })
+      });
+      const data = await response.json();
+      if (!response.ok || !data.response) {
+        throw new Error(data.error || 'No response from server');
+      }
+      return {
+        answer: data.response,
+        confidence: 1.0 // The backend does not return confidence, so we set a default
+      };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to fetch answer');
+    }
   }
 
   async checkHealth(): Promise<boolean> {

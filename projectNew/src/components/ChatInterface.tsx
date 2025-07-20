@@ -56,6 +56,8 @@ export function ChatInterface({ document }: ChatInterfaceProps) {
 
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
+      console.log("This errror is from frontend")
+      console.log(error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
