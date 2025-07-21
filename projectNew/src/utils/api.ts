@@ -4,7 +4,7 @@ import type { APIResponse, UploadResponse } from '../types';
 class APIClient {
   private baseURL: string;
 
-  constructor(baseURL: string = "http://127.0.0.1:5001/") {
+  constructor(baseURL: string = "https://ragapi.sbssdigital.com/") {
     this.baseURL = baseURL;
   }
 
@@ -38,7 +38,7 @@ class APIClient {
 
       xhr.onerror = () => reject(new Error('Network error during upload'));
 
-      xhr.open('POST', `http://127.0.0.1:5001${API_ENDPOINTS.UPLOAD_PDF}`);
+      xhr.open('POST', `${this.baseURL}${API_ENDPOINTS.UPLOAD_PDF}`);
       xhr.send(formData);
     });
   }
@@ -85,7 +85,7 @@ class APIClient {
 
   async checkHealth(): Promise<boolean> {
     try {
-      const response = await fetch(`http://127.0.0.1:5001${API_ENDPOINTS.HEALTH}`);
+      const response = await fetch(`${this.baseURL}${API_ENDPOINTS.HEALTH}`);
       if (!response.ok) return false;
       const data = await response.json();
       return data.status === "ok";
