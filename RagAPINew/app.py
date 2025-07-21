@@ -5,6 +5,14 @@ from supabase import create_client
 from uuid import uuid4
 from dotenv import load_dotenv
 from flask_cors import CORS
+import fitz  # PyMuPDF
+
+def extract_text_from_pdf(pdf_path: str) -> str:
+    doc = fitz.open(pdf_path)
+    full_text = "\n".join(page.get_text() for page in doc)
+    doc.close()
+    return full_text
+
 rag_system = LocalRAGSystemFAISS(llm_model_name="gemini-2.5-flash")
 
 app = Flask(__name__)
@@ -20,6 +28,13 @@ if not SUPABASE_URL or not SUPABASE_KEY:
     raise EnvironmentError("Supabase credentials are missing")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+def upload_to_supabase(local_path, storage_path, content_type):
+    with open(local_path, "rb") as f:
+        supabase.storage.from_(SUPABASE_BUCKET).upload(storage_path, f, {
+            "content-type": content_type,
+            "x-upsert": "true"
+        })
 
 # --- Existing Query Endpoint ---
 @app.route("/query", methods=["POST"])
@@ -60,12 +75,7 @@ def upload_text():
             f.write(text)
 
         # === 2. Upload common.txt to Supabase ===
-        with open(local_txt_path, "rb") as f:
-            storage_path = f"{session_id}/common.txt"
-            supabase.storage.from_(SUPABASE_BUCKET).upload(storage_path, f, {
-                "content-type": "text/plain",
-                "x-upsert": "true"
-            })
+        upload_to_supabase(local_txt_path, f"{session_id}/common.txt", "text/plain")
 
         # === 3. Generate FAISS + metadata ===
         index_path = os.path.join(tmp_dir, f"{session_id}_faiss.idx")
@@ -78,18 +88,10 @@ def upload_text():
         )
 
         # === 4. Upload FAISS index ===
-        with open(index_path, "rb") as f_idx:
-            supabase.storage.from_(SUPABASE_BUCKET).upload(f"{session_id}/faiss.idx", f_idx, {
-                "content-type": "application/octet-stream",
-                "x-upsert": "true"
-            })
+        upload_to_supabase(index_path, f"{session_id}/faiss.idx", "application/octet-stream")
 
         # === 5. Upload Metadata ===
-        with open(meta_path, "rb") as f_meta:
-            supabase.storage.from_(SUPABASE_BUCKET).upload(f"{session_id}/meta.json", f_meta, {
-                "content-type": "application/json",
-                "x-upsert": "true"
-            })
+        upload_to_supabase(meta_path, f"{session_id}/meta.json", "application/json")
 
         return jsonify({
             "message": "Text uploaded and FAISS files created and uploaded",
@@ -99,6 +101,31 @@ def upload_text():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route('/upload-pdf', methods=['POST'])
+def upload_pdf():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    
+    file = request.files['file']
+    
+    if not file.filename or file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    filename = file.filename
+    if not filename.lower().endswith('.pdf'):
+        return jsonify({"error": "Only PDF files are allowed"}), 400
+
+    tmp_dir = os.path.join('tmp')
+    os.makedirs(tmp_dir, exist_ok=True)
+    save_path = os.path.join(tmp_dir, filename)
+    file.save(save_path)
+    
+    text = extract_text_from_pdf(save_path)
+
+    # You can trigger text extraction & processing here asynchronously if needed
+
+    return jsonify({"document_id": file.filename, "status": "success"}), 200
 
 @app.route("/list-sessions", methods=["GET"])
 def list_sessions():
@@ -112,6 +139,7 @@ def list_sessions():
         return jsonify({"sessions": sessions})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route("/load_session", methods=["POST"])
 def load_session():
@@ -155,6 +183,10 @@ def get_common_txt():
         return content, 200, {"Content-Type": "text/plain; charset=utf-8"}
     except Exception as e:
         return str(e), 500
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok"}), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)

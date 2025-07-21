@@ -21,26 +21,16 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
 
   useEffect(() => {
     // Fetch sessions from backend
-  
-    fetchSessions();
-
-    console.log(sessions);
+    const fetchAndSetSessions = async () => {
+      const sessions = await apiClient.fetchSessions();
+      setSessions(sessions);
+      console.log("Fetched sessions:", sessions);
+    };
+    fetchAndSetSessions();
   }, []);
 
   const fetchSessions = async () => {
-    try {
-      const res = await fetch('https://ragapi.sbssdigital.com//list-sessions');
-      const data = await res.json();
-      console.log("Response data:", data);
-      if (data.sessions) {
-        setSessions(data.sessions.map((id: string) => ({ id, name: id })));
-      } else {
-        setSessions([]);
-      }
-    } catch (error) {
-      console.error("Fetch error:", error);
-      setSessions([]);
-    }
+    // No longer needed, handled by apiClient
   };
 
   const handleTextSubmit = async () => {
@@ -114,15 +104,7 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
   const handleSessionClick = async (session: { id: string; name: string }) => {
     setIsLoadingSession(true);
     try {
-      // Call backend to download session files
-      await fetch('https://ragapi.sbssdigital.com//load_session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: session.id })
-      });
-      // Fetch the content of common.txt from the backend (new endpoint)
-      const txtRes = await fetch(`https://ragapi.sbssdigital.com//get-common-txt?session_id=${encodeURIComponent(session.id)}`);
-      const text = await txtRes.text();
+      const text = await apiClient.loadSession(session.id);
       const document: Document = {
         id: session.id,
         name: session.name || 'Previous Session',

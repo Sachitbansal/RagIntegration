@@ -100,14 +100,6 @@ class LocalRAGSystemFAISS: # Changed class name to reflect FAISS
                 self.metadata = json.load(f)
 
     def get_response_from_query(self, query: str, conversation_id: str, k: int = 12) -> tuple[str, list]:
-        # TODO: Get this fixed from backend 
-        # self.load_faiss_index_and_metadata(
-        #     faiss_index_path="RagAPINew/tmp/00445cfa-0df2-436b-9709-76c6c51bf103_faiss.idx",
-        #     meta_path="RagAPINew/tmp/00445cfa-0df2-436b-9709-76c6c51bf103_meta.json",
-        #     file_path="RagAPINew/tmp/00445cfa-0df2-436b-9709-76c6c51bf103_common.txt"
-        # )
-        # TODO: "Get this set dynamically"
-        # self.faiss_index, self.metadata = "RagAPINew/tmp/testuser123_faiss.idx", "RagAPINew/tmp/testuser123_meta.json"
 
         if self.faiss_index is None or self.metadata is None:
             self.load_faiss_index_and_metadata(
