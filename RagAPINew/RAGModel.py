@@ -100,13 +100,6 @@ class LocalRAGSystemFAISS: # Changed class name to reflect FAISS
                 self.metadata = json.load(f)
 
     def get_response_from_query(self, query: str, conversation_id: str, k: int = 12) -> tuple[str, list]:
-
-        if self.faiss_index is None or self.metadata is None:
-            self.load_faiss_index_and_metadata(
-                faiss_index_path="RagAPINew/tmp/faiss.idx",
-                meta_path="RagAPINew/tmp/meta.json",
-                file_path="RagAPINew/tmp/common.txt"
-            )
         
         chain = self.get_chain(conversation_id)
 

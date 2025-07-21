@@ -4,7 +4,7 @@ import type { APIResponse, UploadResponse } from '../types';
 class APIClient {
   private baseURL: string;
 
-  constructor(baseURL: string = "https://ragapi.sbssdigital.com//") {
+  constructor(baseURL: string = "http://127.0.0.1:5001/") {
     this.baseURL = baseURL;
   }
 
@@ -12,6 +12,7 @@ class APIClient {
     return new Promise((resolve, reject) => {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('session_id', "randomID2"); 
 
       const xhr = new XMLHttpRequest();
       
