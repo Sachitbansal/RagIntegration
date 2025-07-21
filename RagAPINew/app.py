@@ -60,8 +60,12 @@ def process_text_upload(text, session_id):
     local_txt_path = os.path.join(tmp_dir, f"{session_id}_common.txt")
     with open(local_txt_path, "w", encoding="utf-8") as f:
         f.write(text)
+        
+    print("made common.txt")
     # Use the new function to save and upload
-    save_and_upload_to_supabase(local_txt_path, session_id, "common.txt", "text/plain")
+    upload_to_supabase(local_txt_path, f"{session_id}/common.txt", "text/plain")
+    # save_and_upload_to_supabase(local_txt_path, session_id, "common.txt", "text/plain")
+    print("uploaded file to supabase")
     # === 3. Generate FAISS + metadata ===
     index_path = os.path.join(tmp_dir, f"{session_id}_faiss.idx")
     meta_path = os.path.join(tmp_dir, f"{session_id}_meta.json")
@@ -70,6 +74,8 @@ def process_text_upload(text, session_id):
         faiss_index_path=index_path,
         meta_path=meta_path
     )
+    
+    print("given files to rag")
     # === 4. Upload FAISS index ===
     upload_to_supabase(index_path, f"{session_id}/faiss.idx", "application/octet-stream")
     # === 5. Upload Metadata ===

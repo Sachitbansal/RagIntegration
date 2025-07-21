@@ -1,1 +1,321 @@
-General Engineering is a first-of-its-kind degree in India, offered exclusively at IIT Mandi. This branch is ideal for students who are undecided about their career path and wish to explore various engineering domains before making a choice. In the first two years, the program promotes interdisciplinary learning, allowing students to delve into mechanical topics (mechanics, fluid dynamics, thermodynamics), electrical topics (semiconductor electronics, digital systems, signal processing), and software fields (data science, machine learning, deep learning). Students graduate with a B.Tech in General Engineering with Specialisation in [ABC], where ABC refers to one of the available specialisations: Robotics & AI, Mechatronics, Finance Management, or Communications. These begin in the third year and include focused coursework in the chosen area. An additional option, called Open Specialisation, allows students to study from a set of electives across various domains. However, this combination must not replicate 40% or more of the core courses of any existing branch. Students opting for this route will receive the degree B.Tech in General Engineering (without a named specialisation). Description of specializations :  1. Robotics & AI : This specialisation combines engineering fundamentals with artificial intelligence, machine learning and embedded systems. It prepares students to design and control intelligent systems, with applications in robotics, autonomous vehicles, and human-robot interaction. Top careers: Robotics Engineer, Computer Vision Engineer, Embedded AI Engineer, Autonomous Systems Engineer, Research Scientist (AI & Robotics) 2. Mechatronics : Mechatronics integrates mechanical design, electronics, and intelligent control systems to create smart and automated products. It is especially relevant in industries such as manufacturing, aerospace, consumer electronics, and automotive. Top careers: Automation Engineer, Aerospace Engineer, Product Design Engineer, Automotive Systems Engineer, Electric Vehicle Engineer 3. Communications : Communication Engineering is the foundation of modern connectivity, spanning mobile networks, the internet, satellites, and IoT. Students study signal processing, modulation techniques, and wireless technologies like 5G and IoT. Top careers: Network Engineer, Telecom Engineer, Signal Processing Engineer, Control Systems Engineer, Researcher (Communication Systems) 4. Finance Management : This unique specialisation blends finance with data science, programming, and mathematical modeling. It focuses on using analytics and technology to tackle challenges in banking, investments, and fintech. Top careers: Quantitative Analyst, Data Scientist, Quant Trader, Algorithmic Developer, Product Manager (Fintech), Risk Manager. 5. Open specialisation : Students choosing this option can tailor their academic journey based on personal interests, selecting electives from multiple disciplines. It's well-suited for those inclined toward entrepreneurship, interdisciplinary roles, or competitive exams. Career paths are diverse and can include roles in software, design and manufacturing, research, tech startups, and more. Top careers: Software Developer, Tech Generalist, Design Engineer, Researcher, Entrepreneur Placement data :  Since the first batch of General Engineering students has not yet graduated, official placement data is not available. Placement eligibility varies by company. However, students who build strong skills and maintain a well-crafted resume are likely to receive attractive job offers, especially given the program's interdisciplinary nature and flexibility. Future plan :  The program intends to expand its horizons through the introduction of new, forward-thinking specialisations. Proposed areas include Film, Design, Administration, Sustainability Engineering, Quantum Engineering, Indian Knowledge System, and Innovation & Entrepreneurship — reflecting the institute’s commitment to interdisciplinary and socially relevant education. Additionally, the program aims to strengthen its industry interface through collaborations with leading partners like Dassault Systèmes, Bentley, and GlobalLogic. Cross-institutional exposure is also being promoted, with AIIMS Bilaspur serving as a visiting college, particularly in the domain of biomedical devices.
+Artificial Intelligence
+Dr. Indu Joshi
+Assistant Professor at
+Indian Institute of Technology Mandi
+30 June 2025
+
+Introduction to Artificial Intelligence and Machine Learning
+• Artificial Intelligence (AI) refers to the simulation of human
+intelligence in machines that are programmed to think and act
+like humans.
+• AI is a broad field encompassing systems that perform tasks
+requiring human intelligence, such as reasoning, learning, and
+problem-solving.
+• Machine Learning (ML) is a subset of AI that enables
+machines to learn from data and improve over time without
+explicit programming.
+
+When Do We Need Machine Learning?
+• When do we need machine learning rather than directly
+program our computers to carry out the task at hand?
+• Two aspects of a given problem may call for the use of
+programs that learn and improve on the basis of their
+“experience”: the problem’s complexity and the need for
+adaptivity.
+
+Types of Learning
+
+Types of Learning
+• Supervised Learning: Learning from labeled data.
+• Unsupervised Learning: Learning patterns from unlabeled
+data.
+• Semi-Supervised Learning: Learning from a mix of labeled
+and unlabeled data.
+• Reinforcement Learning: Learning through rewards and
+penalties.
+
+Supervised Learning
+• Data has input-output pairs (labeled data).
+• Goal: Learn a mapping from input to output.
+• Examples: Classification, regression.
+• Applications: Spam email detection, predicting house prices.
+
+Unsupervised Learning
+• No labeled data.
+• Goal: Discover patterns and structure.
+• Examples: Clustering, dimensionality reduction.
+• Applications: Customer segmentation, anomaly detection.
+
+Supervised vs. Unsupervised Learning
+
+Semi-supervised Learning
+• Combines labeled and unlabeled data.
+• Goal: Improve learning efficiency using limited labeled data.
+• Applications: Text classification, Medical diagnosis (limited
+labeled data).
+
+Example-Semi-supervised
+
+Reinforcement Learning
+• Agent learns by interacting with the environment.
+• Receives rewards for desired actions and penalties for
+undesired ones.
+• Goal: Maximize cumulative reward.
+• Applications: game playing (e.g., AlphaGo), robotics.
+
+Key Components of Reinforcement Learning
+• Agent: The learner.
+• Environment: The world the agent interacts with.
+• State: Current situation of the agent.
+• Action: What the agent can do.
+• Reward: Feedback from the environment.
+
+Reinforcement Learning
+
+ML Pipeline
+
+Model Training
+• Model training is the process of teaching a machine learning
+algorithm to make predictions or decisions.
+• Key components:
+• Data preparation.
+• Model selection.
+• Learning from data.
+• Goal: Minimize error and generalize well to new data.
+
+Collecting and Preparing Data
+• Collect data from various sources.
+• Clean and preprocess data (e.g., handle missing values, scale
+features).
+• Split into training, validation, and testing datasets.
+
+Model Selection
+• Choose an algorithm based on the problem type:
+• Classification (e.g., neural network, SVM).
+• Regression (e.g., linear regression).
+• Clustering (e.g., k-means). Consider model complexity and
+data size.
+
+Training
+• The model learns patterns in the training data.
+• Key steps:
+• Initialize model parameters.
+• Compute predictions.
+• Calculate error (loss function).
+• Update parameters using optimization algorithms (e.g.,
+gradient descent).
+
+Loss Function
+• Quantifies the error between predicted and actual values.
+• Examples:
+• Mean Squared Error (MSE) for regression.
+• Cross-Entropy Loss for classification.
+• Goal: Minimize the loss function.
+
+Validation
+• Evaluate the model on the validation dataset.
+• Monitor metrics like accuracy, precision, recall, or MSE.
+• Avoid overfitting by tuning hyperparameters.
+
+Testing
+• Final evaluation on unseen data (testing dataset).
+• Ensure the model generalizes well.
+• Use metrics to assess performance.
+
+Model Evaluation: Training, Validation, and Testing
+
+Why Do We Split Data?
+• Avoid overfitting and underfitting.
+• Assess model performance on unseen data.
+• Fine-tune hyperparameters.
+
+Training Set
+• Used to train the machine learning model.
+• Model learns patterns and relationships in the data.
+• Typically the largest portion of the dataset ( 60-70%).
+
+Validation Set
+• Used for hyperparameter tuning.
+• Helps prevent overfitting by evaluating the model during
+training.
+• Typically 15-20% of the dataset.
+
+Test Set
+• Used to evaluate final model performance.
+• Provides an unbiased estimate of the model’s accuracy.
+• Typically 15-20% of the dataset.
+
+Cross Validation
+• Ensures robustness by using multiple validation sets.
+• Common techniques: K-Fold, Leave-One-Out.
+• Helps when datasets are small.
+
+Trade-off
+• In machine learning, there is a trade-off between
+• Complex models that fit the training data well
+• simpler models that may generalise better
+• As the amount of training data increases, the generalization
+error decreases.
+
+Underfitting and Overfitting
+Achieving the Right Balance for Optimal Model Performance.
+
+Underfitting and Overfitting
+• Underfitting: Model is too simple to capture patterns in the
+data.
+• Overfitting: Model is too complex and captures noise instead
+of patterns.
+
+Underfitting
+• Occurs when the model cannot capture the underlying trends.
+• Characteristics:
+• Poor performance on both training and test sets.
+• Causes:
+• Model is too simple.
+• Insufficient training or features.
+• Example: Linear model for non-linear data.
+
+Overfitting
+• Occurs when the model captures noise along with the signal.
+• Characteristics:
+• Excellent performance on training but poor on test data.
+• Causes:
+• Model is too complex.
+• Insufficient or noisy data.
+Example: A very wiggly curve fitting random noise in the data.
+
+Preventing Underfitting
+• Increase model complexity.
+• Train longer with sufficient data.
+• Improve feature engineering.
+
+Preventing Overfitting
+• Simplify the model.
+• Use regularization techniques (L1, L2).
+• Data augmentation and more training data.
+• Use dropout in neural networks.
+• Cross-validation.
+
+Experimental Evaluation of Machine Learning Algorithms
+• It is essential to evaluate the performance of learning systems
+because these systems are usually designed to predict the class
+of future unlabelled data points.
+• Metrics for performance evaluation include: error, accuracy
+and precision/recall.
+
+Evaluation of Predictions
+• Suppose we want to make a prediction of a value for a target
+feature on example x.
+• y is the observed value of target feature on example x.
+• ˆy is the predicted value of target feature on example x.
+• How to quantify the error?
+
+Evaluation Matrix-Regression
+• Absolute Error:
+1
+n
+n
+X
+i=1
+|ˆy −y|
+• Sum of Squares Error:
+1
+n
+n
+X
+i=1
+(ˆy −y)2
+
+Evaluation Matrix-Classification
+Accuracy =TP + TN
+P + N
+Precision =
+TP
+TP + FP
+Recall =TP
+P
+• When choosing a metric, one must consider the implications
+of false positives and false negatives on that application.
+• In scenarios like healthcare, a high recall is essential to ensure
+all disease cases are identified despite the risk of false
+positives.
+• In contrast, precision may be more important in scenarios like
+spam detection, where false positives (legitimate emails
+marked as spam) can be highly disruptive.
+
+Accuracy
+Accuracy =TP + TN
+P + N
+• Works well for balanced datasets.
+• Misleading for imbalanced datasets.
+
+Precision and Recall
+Precision =
+TP
+TP + FP
+Recall =TP
+P
+• Precision signifies the proportion of true positives among
+predicted positives.
+• Recall signifies the proportion of true positives among actual
+positives.
+• Trade-off between precision and recall.
+
+F1 Score: Balancing Precision and Recall
+F1 = 2 · Precision · Recall
+Precision + Recall
+• Harmonic mean of precision and recall.
+• Useful for imbalanced datasets.
+
+ROC and AUC
+• Receiver Operating Characteristic (ROC) Curve: Plots True
+Positive Rate (TPR) vs. False Positive Rate (FPR).
+• AUC (Area Under the Curve): Measures the ability to
+distinguish between classes.
+• Higher AUC indicates better performance.
+
+Example
+
+Example
+Accuracy =
+TP + TN
+TP + TN + FP + FN
+=
+980 + 2
+980 + 2 + 0 + 18 = 982
+1000 = 0.982 (or 98.2%)
+Precision (for Disease class) =
+TP
+TP + FP =
+2
+2 + 0 = 2
+2 = 1.0 (or 100%)
+Recall =
+TP
+TP + FN =
+2
+2 + 18 = 2
+20 = 0.1 (or 10%)
+F1 = 2 × Precision × Recall
+Precision + Recall
+= 2 × 1.0 × 0.1
+1.0 + 0.1 = 2 × 0.1
+1.1 = 2 × 0.0909 = 0.1818 (or 18.18%)
+
+Example
+
+Example
+• Accuracy: 98.2% – While high, it does not account for our
+dataset’s gravity of false negatives.
+• Precision: 100% – The model’s every positive prediction is
+correct, but this does not consider the number of missed true
+positives.
+• Recall: 10% – This low score indicates that the model fails to
+identify 90% of actual positive cases, a critical flaw in specific
+contexts such as disease diagnosis.
+• F1 Score: Approximately 0.18 – This score balances precision
+and recall, but in this case, it leans towards precision due to
+the very low recall.
+
+Thank You
+Contact: indujoshi@iitmandi.ac.in
