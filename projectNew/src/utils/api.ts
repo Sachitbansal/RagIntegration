@@ -4,7 +4,7 @@ import type { APIResponse, UploadResponse } from '../types';
 class APIClient {
   private baseURL: string;
 
-  constructor(baseURL: string = "https://ragapi.sbssdigital.com/") {
+  constructor(baseURL: string = "http://127.0.0.1:8000") {
     this.baseURL = baseURL;
   }
 

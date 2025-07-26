@@ -8,6 +8,7 @@ from flask_cors import CORS
 import fitz
 import shutil
 
+
 def extract_text_from_pdf(pdf_path: str) -> str:
     doc = fitz.open(pdf_path)
     full_text = "\n".join(page.get_text() for page in doc)
