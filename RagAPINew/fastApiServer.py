@@ -7,7 +7,7 @@ from typing import Optional, Dict, List
 
 from fastapi import FastAPI, HTTPException, status, BackgroundTasks, UploadFile, File, Form
 from pydantic import BaseModel, Field # Import Field for Pydantic models
-
+from fastapi.responses import PlainTextResponse
 # Import CORSMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -167,6 +167,54 @@ async def process_text_upload_task(text: str, session_id: str):
                 except OSError as e:
                     print(f"Error cleaning up file {path}: {e}")
 
+async def load_session_task(session_id: str):
+    """
+    Background task to download session files from Supabase,
+    clean the local tmp directory, and load the RAG system.
+    """
+    file_names = ["common.txt", "faiss.idx", "meta.json"]
+    tmp_dir = os.path.join("tmp") # Standardizing tmp_dir path
+    
+    try:
+        # Clean up existing tmp directory before downloading new session files
+        if os.path.exists(tmp_dir):
+            print(f"Removing existing tmp directory: {tmp_dir}")
+            shutil.rmtree(tmp_dir)
+        os.makedirs(tmp_dir, exist_ok=True)
+        print(f"Created fresh tmp directory: {tmp_dir}")
+
+        if not supabase:
+            raise RuntimeError("Supabase client not initialized. Cannot load session files.")
+
+        for file_name in file_names:
+            remote_path = f"{session_id}/{file_name}"
+            local_path = os.path.join(tmp_dir, file_name)
+
+            print(f"Attempting to download {remote_path} to {local_path}")
+            res = supabase.storage.from_(SUPABASE_BUCKET).download(remote_path)
+            with open(local_path, "wb") as f:
+                f.write(res)
+            print(f"Successfully downloaded {file_name}")
+            
+        # Load the RAG system with the newly downloaded files
+        rag_system.load_faiss_index_and_metadata(
+            file_path=os.path.join(tmp_dir, "common.txt"),
+            faiss_index_path=os.path.join(tmp_dir, "faiss.idx"),
+            meta_path=os.path.join(tmp_dir, "meta.json")
+        )
+        print(f"RAG system loaded for session: {session_id}")
+
+    except Exception as e:
+        print(f"Error during background loading of session {session_id}: {e}")
+        # In a real app, you might want to log this error more robustly
+        # and potentially update a status in a database.
+    finally:
+        # Optional: Clean up downloaded files after RAG system is loaded
+        # For a RAG system that keeps files in memory, you might delete them.
+        # If the RAG system needs the files on disk, you might skip this cleanup.
+        # For now, let's keep them as the original Flask code implies they stay.
+        pass
+    
 # --- Pydantic Models for Request/Response Bodies ---
 class UploadTextRequest(BaseModel):
     text: str
@@ -174,6 +222,14 @@ class UploadTextRequest(BaseModel):
 
 class SessionListResponse(BaseModel):
     sessions: List[str] = Field(..., example=["session_id_1", "session_id_2"])
+
+class LoadSessionRequest(BaseModel):
+    session_id: str = Field(..., example="my_test_session_123")
+
+class LoadSessionResponse(BaseModel):
+    message: str
+    session_id: str
+    status: str = Field(..., example="processing_in_background")
 
 
 # --- FastAPI Endpoints ---
@@ -233,12 +289,7 @@ async def list_sessions():
         # Note: The list method in supabase-py is synchronous. If it were async,
         # you'd use await supabase.storage.from_(...).list(...)
         result = supabase.storage.from_(SUPABASE_BUCKET).list("", {"limit": 1000})
-        
-        # Supabase list() returns a list of dictionaries like:
-        # [{'id': '...', 'name': 'folder_name/', 'updated_at': '...', 'created_at': '...', 'last_accessed_at': '...', 'metadata': {}, 'owner': '...', 'path': 'folder_name/', 'type': 'folder'}]
-        # or for files:
-        # [{'id': '...', 'name': 'file.txt', 'updated_at': '...', 'created_at': '...', 'last_accessed_at': '...', 'metadata': {}, 'owner': '...', 'path': 'folder_name/file.txt', 'type': 'file'}]
-
+ 
         sessions = [item['name'] for item in result]
 
         return {"sessions": sessions}
@@ -246,7 +297,67 @@ async def list_sessions():
         print(f"Error listing sessions from Supabase: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to list sessions: {e}")
 
+@app.get("/get-common-txt", response_class=PlainTextResponse)
+async def get_common_txt_endpoint():
+    """
+    Retrieves the content of the locally stored 'common.txt' file.
+    """
+    # The original Flask code used "RagAPINew/tmp/common.txt".
+    # Ensure this path is correct relative to where your FastAPI app is run.
+    # If `tmp` is at the root of your project, it should be 'tmp/common.txt'.
+    # I'm assuming 'RagAPINew' is a parent directory. Adjust if needed.
+    txt_path = os.path.join("RagAPINew", "tmp", "common.txt")
+    
+    if not os.path.exists(txt_path):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="common.txt not found at specified path."
+        )
+    try:
+        with open(txt_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        return PlainTextResponse(content, status_code=status.HTTP_200_OK)
+    except Exception as e:
+        print(f"Error reading common.txt: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to read common.txt: {e}"
+        )
+        
+        
+@app.post("/load-session", status_code=status.HTTP_202_ACCEPTED, response_model=LoadSessionResponse)
+async def load_session_endpoint(
+    request_data: LoadSessionRequest,
+    background_tasks: BackgroundTasks
+):
+    """
+    Initiates the loading of a specified session's files (common.txt, faiss.idx, meta.json)
+    from Supabase storage into the local 'tmp' directory and loads them into the RAG system.
+    This operation runs as a background task.
+    """
+    session_id = request_data.session_id
 
+    if not session_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing 'session_id' in request body."
+        )
+    
+    if not supabase:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Supabase client not initialized. Cannot load session."
+        )
+
+    # Add the session loading function to background tasks
+    background_tasks.add_task(load_session_task, session_id)
+
+    return {
+        "message": f"Session '{session_id}' loading initiated in background. Check server logs for status.",
+        "session_id": session_id,
+        "status": "processing_in_background"
+    }
+    
 # --- Run the Application ---
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
