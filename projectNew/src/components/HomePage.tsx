@@ -27,9 +27,6 @@ export function HomePage() {
     fetchAndSetSessions();
   }, []);
 
-  const fetchSessions = async () => {
-    // No longer needed, handled by apiClient
-  };
 
   const handleTextSubmit = async () => {
     if (!text.trim()) return;

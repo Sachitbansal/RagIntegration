@@ -175,7 +175,7 @@ def upload_pdf():
         return jsonify({"error": "No file part"}), 400
     
     file = request.files['file']
-    session_id = request.form.get('session_id') or request.args.get('session_id')
+    session_id = str(uuid4())
     if not session_id:
         return jsonify({"error": "Missing session_id"}), 400
     if not file.filename or file.filename == '':
@@ -186,7 +186,6 @@ def upload_pdf():
     save_name, save_path = save_and_upload_to_supabase(file, session_id, filename, "application/pdf", is_file_object=True)
     # Optionally extract text
     text = extract_text_from_pdf(save_path)
-    print(text)
     
     try:
         resp = process_text_upload(text, session_id)

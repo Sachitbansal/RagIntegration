@@ -12,7 +12,6 @@ class APIClient {
     return new Promise((resolve, reject) => {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('session_id', "randomID2");
 
       const xhr = new XMLHttpRequest();
 
@@ -27,7 +26,12 @@ class APIClient {
         if (xhr.status === 200) {
           try {
             const response = JSON.parse(xhr.responseText);
-            resolve(response);
+            // Accept session_id or document_id from backend for routing
+            resolve({
+              document_id: response.session_id,
+              status: response.status || 'success',
+              ...response
+            });
           } catch (error) {
             reject(new Error('Invalid response format'));
           }
