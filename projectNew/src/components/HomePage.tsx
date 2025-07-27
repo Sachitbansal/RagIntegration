@@ -4,7 +4,6 @@ import { Upload, FileText, Zap } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
 import { apiClient } from '../utils/api';
 import { QUICK_ACTIONS } from '../utils/constants';
-import type { Document } from '../types';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -114,7 +113,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 dark:from-gray-900 dark:via-blue-950 dark:to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 dark:from-gray-900 dark:via-blue-950 dark:to-gray-900 flex items-center justify-center p-4 pt-20 md:pt-0">
       <div className="w-full max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -177,20 +176,21 @@ export function HomePage() {
               <div className="text-center">
                 <Upload className={`w-12 h-12 mx-auto mb-4 transition-colors ${isDragging ? 'text-blue-400' : 'text-gray-400'
                   }`} />
-                <p className="text-gray-300 mb-2">
-                  {isDragging ? 'Drop your PDF here' : 'Drag & drop your PDF file'}
-                </p>
-                <p className="text-gray-500 text-sm">or click to browse</p>
+                <p className="text-gray-400">Drag & drop a PDF file here, or click to upload</p>
               </div>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf"
-                onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
-                className="hidden"
-              />
             </div>
+
+            <input
+              type="file"
+              accept="application/pdf"
+              ref={fileInputRef}
+              onChange={(e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  handleFileUpload(e.target.files[0]);
+                }
+              }}
+              className="hidden"
+            />
           </div>
         </div>
 

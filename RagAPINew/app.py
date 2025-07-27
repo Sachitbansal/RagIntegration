@@ -4,9 +4,11 @@ from RAGModel import LocalRAGSystemFAISS
 from supabase import create_client
 from uuid import uuid4
 from dotenv import load_dotenv
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import fitz
 import shutil
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 
 def extract_text_from_pdf(pdf_path: str) -> str:
@@ -19,7 +21,7 @@ rag_system = LocalRAGSystemFAISS(llm_model_name="gemini-2.5-flash")
 
 app = Flask(__name__)
 load_dotenv()
-CORS(app)
+CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
 
 # --- Supabase Config ---
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -30,6 +32,8 @@ if not SUPABASE_URL or not SUPABASE_KEY:
     raise EnvironmentError("Supabase credentials are missing")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 def upload_to_supabase(local_path, storage_path, content_type):
     with open(local_path, "rb") as f:
@@ -282,6 +286,30 @@ def get_common_txt():
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"}), 200
+
+@app.route('/api/auth/google', methods=['POST', 'OPTIONS'])
+@cross_origin(origins=["http://localhost:5173"])  # Explicit CORS for this route
+def google_auth():
+    if request.method == "OPTIONS":
+        # CORS preflight response
+        return '', 200
+
+    data = request.get_json()
+    token = data.get('token')
+
+    if not token:
+        return jsonify({'error': 'Missing token'}), 400
+
+    try:
+        idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_CLIENT_ID)
+        return jsonify({
+            'sub': idinfo.get('sub'),
+            'email': idinfo.get('email'),
+            'name': idinfo.get('name'),
+            'picture': idinfo.get('picture'),
+        })
+    except Exception as e:
+        return jsonify({'error': 'Invalid token', 'details': str(e)}), 401
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)

@@ -1,4 +1,4 @@
-import { API_BASE_URL, API_ENDPOINTS } from './constants';
+import {API_ENDPOINTS } from './constants';
 import type { APIResponse, UploadResponse } from '../types';
 
 class APIClient {
@@ -131,6 +131,21 @@ class APIClient {
       return await txtRes.text();
     } catch (error) {
       throw new Error('Failed to load session.');
+    }
+  }
+
+  async loginWithGoogle(token: string) {
+    try {
+      const res = await fetch(`${this.baseURL}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+      if (!res.ok) throw new Error('Google login failed');
+      return await res.json();
+    } catch (err) {
+      console.error('Google login error:', err);
+      throw err;
     }
   }
 
