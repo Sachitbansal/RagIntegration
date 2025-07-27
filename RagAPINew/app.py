@@ -85,6 +85,74 @@ def process_text_upload(text, session_id):
         "message": "Text uploaded and FAISS files created and uploaded",
         "session_id": session_id
     }
+    
+@app.route('/session/<session_id>/document', methods=['GET'])
+def get_session_document(session_id):
+    """
+    Returns document info and content for a session.
+    - If common.txt exists, returns as text document.
+    - If only PDF exists, returns as PDF (no preview content).
+    """
+    try:
+        # Try to download common.txt from Supabase
+        import tempfile
+        tmp_dir = tempfile.gettempdir()
+        local_txt_path = os.path.join(tmp_dir, f"{session_id}_common.txt")
+        remote_txt_path = f"{session_id}/common.txt"
+        try:
+            # Download common.txt
+            res = supabase.storage.from_(SUPABASE_BUCKET).download(remote_txt_path)
+            with open(local_txt_path, "wb") as f:
+                f.write(res)
+            # Download faiss.idx and meta.json
+            faiss_path = os.path.join(tmp_dir, f"{session_id}_faiss.idx")
+            meta_path = os.path.join(tmp_dir, f"{session_id}_meta.json")
+            res_faiss = supabase.storage.from_(SUPABASE_BUCKET).download(f"{session_id}/faiss.idx")
+            with open(faiss_path, "wb") as f:
+                f.write(res_faiss)
+            res_meta = supabase.storage.from_(SUPABASE_BUCKET).download(f"{session_id}/meta.json")
+            with open(meta_path, "wb") as f:
+                f.write(res_meta)
+            # Load into RAG model
+            rag_system.load_faiss_index_and_metadata(
+                file_path=local_txt_path,
+                faiss_index_path=faiss_path,
+                meta_path=meta_path
+            )
+            with open(local_txt_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            doc_info = {
+                "id": session_id,
+                "name": "common.txt",
+                "type": "text",
+                "size": len(content.encode("utf-8")),
+                "content": content
+            }
+            return jsonify(doc_info)
+        except Exception:
+            # If no common.txt, try to find a PDF
+            # List files in the session folder
+            result = supabase.storage.from_(SUPABASE_BUCKET).list(session_id)
+            pdf_file = None
+            for item in result:
+                if item['name'].lower().endswith('.pdf'):
+                    pdf_file = item['name']
+                    break
+            if pdf_file:
+                remote_pdf_path = f"{session_id}/{pdf_file}"
+                # Get file size
+                meta = supabase.storage.from_(SUPABASE_BUCKET).get_metadata(remote_pdf_path)
+                doc_info = {
+                    "id": session_id,
+                    "name": pdf_file,
+                    "type": "pdf",
+                    "size": meta.get('size', 0),
+                    "content": None
+                }
+                return jsonify(doc_info)
+            return jsonify({"error": "No document found for this session."}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # --- ✅ New Upload Text Endpoint ---
 @app.route("/upload-text", methods=["POST"])
@@ -126,8 +194,6 @@ def upload_pdf():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-    return jsonify({"document_id": save_name, "status": "success"}), 200
-
 # --- Existing Query Endpoint ---
 @app.route("/query", methods=["POST"])
 def query():

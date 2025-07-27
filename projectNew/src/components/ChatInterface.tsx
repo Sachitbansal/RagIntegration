@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import { Send, User, Bot, Clock } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
 import { apiClient } from '../utils/api';
@@ -7,11 +8,9 @@ import type { Message, Document } from '../types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-interface ChatInterfaceProps {
-  document: Document;
-}
-
-export function ChatInterface({ document }: ChatInterfaceProps) {
+export function ChatInterface() {
+  const { sessionId } = useParams();
+  const [document, setDocument] = useState<Document | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -27,8 +26,22 @@ export function ChatInterface({ document }: ChatInterfaceProps) {
     inputRef.current?.focus();
   }, []);
 
+  // Fetch document info by sessionId
+  useEffect(() => {
+    async function fetchDocument() {
+      if (!sessionId) return;
+      try {
+        const doc = await apiClient.getDocumentBySessionId(sessionId);
+        setDocument(doc);
+      } catch (e) {
+        setDocument(null);
+      }
+    }
+    fetchDocument();
+  }, [sessionId]);
+
   const sendMessage = async (messageText: string) => {
-    if (!messageText.trim()) return;
+    if (!messageText.trim() || !document) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -86,6 +99,14 @@ export function ChatInterface({ document }: ChatInterfaceProps) {
     return `${(ms / 1000).toFixed(1)}s`;
   };
 
+  if (!document) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <LoadingSpinner message="Loading document..." size="lg" />
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg rounded-2xl border border-white/20 dark:border-gray-700/50 overflow-hidden max-h-[80vh]">
       {/* Header */}
@@ -124,23 +145,21 @@ export function ChatInterface({ document }: ChatInterfaceProps) {
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div className={`flex space-x-3 max-w-[80%] ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                message.type === 'user' 
-                  ? 'bg-blue-600' 
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${message.type === 'user'
+                  ? 'bg-blue-600'
                   : 'bg-gray-600'
-              }`}>
+                }`}>
                 {message.type === 'user' ? (
                   <User className="w-4 h-4 text-white" />
                 ) : (
                   <Bot className="w-4 h-4 text-white" />
                 )}
               </div>
-              
-              <div className={`px-4 py-3 rounded-2xl ${
-                message.type === 'user'
+
+              <div className={`px-4 py-3 rounded-2xl ${message.type === 'user'
                   ? 'bg-blue-600 text-white'
                   : 'bg-white/10 dark:bg-gray-700/50 text-gray-100'
-              }`}>
+                }`}>
                 {message.type === 'ai' ? (
                   <div className="prose prose-invert max-w-none text-sm leading-relaxed">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -200,7 +219,7 @@ export function ChatInterface({ document }: ChatInterfaceProps) {
             <Send className="w-5 h-5" />
           </button>
         </form>
-        
+
         <div className="mt-2 text-xs text-gray-500 text-center">
           Press Enter to send • Ctrl+L to toggle theme • Esc to clear
         </div>

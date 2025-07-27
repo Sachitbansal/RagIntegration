@@ -4,7 +4,7 @@ import type { APIResponse, UploadResponse } from '../types';
 class APIClient {
   private baseURL: string;
 
-  constructor(baseURL: string = "http://127.0.0.1:8000") {
+  constructor(baseURL: string = "http://127.0.0.1:5001") {
     this.baseURL = baseURL;
   }
 
@@ -12,10 +12,10 @@ class APIClient {
     return new Promise((resolve, reject) => {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('session_id', "randomID2"); 
+      formData.append('session_id', "randomID2");
 
       const xhr = new XMLHttpRequest();
-      
+
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable && onProgress) {
           const progress = (event.loaded / event.total) * 100;
@@ -81,6 +81,13 @@ class APIClient {
     } catch (error: any) {
       throw new Error(error.message || 'Failed to fetch answer');
     }
+  }
+  // Add getDocumentBySessionId for session-based document fetch
+  async getDocumentBySessionId(sessionId: string) {
+    // Adjust the endpoint as per your backend
+    const res = await fetch(`${this.baseURL}/session/${sessionId}/document`);
+    if (!res.ok) throw new Error('Failed to fetch document');
+    return await res.json();
   }
 
   async checkHealth(): Promise<boolean> {

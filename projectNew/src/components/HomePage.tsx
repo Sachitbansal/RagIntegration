@@ -1,15 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Upload, FileText, Zap } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
 import { apiClient } from '../utils/api';
 import { QUICK_ACTIONS } from '../utils/constants';
 import type { Document } from '../types';
 
-interface HomePageProps {
-  onDocumentReady: (document: Document) => void;
-}
-
-export function HomePage({ onDocumentReady }: HomePageProps) {
+export function HomePage() {
+  const navigate = useNavigate();
   const [text, setText] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -35,18 +33,11 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
 
   const handleTextSubmit = async () => {
     if (!text.trim()) return;
-
     setIsUploading(true);
     try {
       const response = await apiClient.analyzeText(text);
-      const document: Document = {
-        id: response.document_id,
-        name: 'Text Input',
-        size: text.length,
-        type: 'text',
-        content: text
-      };
-      onDocumentReady(document);
+      // Navigate to session route with new session/document id
+      navigate(`/session/${response.document_id}`);
     } catch (error) {
       console.error('Error analyzing text:', error);
     } finally {
@@ -59,20 +50,11 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
       alert('Please upload a PDF file');
       return;
     }
-
     setIsUploading(true);
     setUploadProgress(0);
-
     try {
       const response = await apiClient.uploadPDF(file, setUploadProgress);
-      const document: Document = {
-        id: response.document_id,
-        name: file.name,
-        size: file.size,
-        type: 'pdf',
-        uploadProgress: 100
-      };
-      onDocumentReady(document);
+      navigate(`/session/${response.document_id}`);
     } catch (error) {
       console.error('Error uploading file:', error);
     } finally {
@@ -84,7 +66,7 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       handleFileUpload(files[0]);
@@ -104,15 +86,8 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
   const handleSessionClick = async (session: { id: string; name: string }) => {
     setIsLoadingSession(true);
     try {
-      const text = await apiClient.loadSession(session.id);
-      const document: Document = {
-        id: session.id,
-        name: session.name || 'Previous Session',
-        size: text.length,
-        type: 'text',
-        content: text
-      };
-      onDocumentReady(document);
+      // Optionally, you can check if session exists or load it here
+      navigate(`/session/${session.id}`);
     } catch (error) {
       alert('Failed to load session.');
     } finally {
@@ -124,13 +99,13 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 dark:from-gray-900 dark:via-blue-950 dark:to-gray-900">
         <div className="text-center space-y-6">
-          <LoadingSpinner 
-            message={isLoadingSession ? 'Loading session...' : (uploadProgress > 0 ? `Uploading... ${Math.round(uploadProgress)}%` : "Analyzing document...")} 
-            size="lg" 
+          <LoadingSpinner
+            message={isLoadingSession ? 'Loading session...' : (uploadProgress > 0 ? `Uploading... ${Math.round(uploadProgress)}%` : "Analyzing document...")}
+            size="lg"
           />
           {uploadProgress > 0 && !isLoadingSession && (
             <div className="w-64 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div 
+              <div
                 className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${uploadProgress}%` }}
               />
@@ -167,14 +142,14 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
               <FileText className="w-6 h-6 text-blue-400" />
               <h2 className="text-xl font-semibold text-white">Paste Your Text</h2>
             </div>
-            
+
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Paste your text here for AI analysis..."
               className="w-full h-48 p-4 bg-white/5 dark:bg-gray-900/50 border border-white/10 dark:border-gray-700/50 rounded-xl text-white placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-            
+
             <button
               onClick={handleTextSubmit}
               disabled={!text.trim()}
@@ -191,28 +166,26 @@ export function HomePage({ onDocumentReady }: HomePageProps) {
               <Upload className="w-6 h-6 text-blue-400" />
               <h2 className="text-xl font-semibold text-white">Upload PDF</h2>
             </div>
-            
+
             <div
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
-              className={`relative h-48 border-2 border-dashed rounded-xl transition-all duration-200 flex items-center justify-center cursor-pointer ${
-                isDragging 
-                  ? 'border-blue-400 bg-blue-400/10' 
+              className={`relative h-48 border-2 border-dashed rounded-xl transition-all duration-200 flex items-center justify-center cursor-pointer ${isDragging
+                  ? 'border-blue-400 bg-blue-400/10'
                   : 'border-white/30 dark:border-gray-600/50 hover:border-blue-400 hover:bg-blue-400/5'
-              }`}
+                }`}
               onClick={() => fileInputRef.current?.click()}
             >
               <div className="text-center">
-                <Upload className={`w-12 h-12 mx-auto mb-4 transition-colors ${
-                  isDragging ? 'text-blue-400' : 'text-gray-400'
-                }`} />
+                <Upload className={`w-12 h-12 mx-auto mb-4 transition-colors ${isDragging ? 'text-blue-400' : 'text-gray-400'
+                  }`} />
                 <p className="text-gray-300 mb-2">
                   {isDragging ? 'Drop your PDF here' : 'Drag & drop your PDF file'}
                 </p>
                 <p className="text-gray-500 text-sm">or click to browse</p>
               </div>
-              
+
               <input
                 ref={fileInputRef}
                 type="file"

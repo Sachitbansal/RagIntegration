@@ -1,41 +1,44 @@
-import React, { useState } from 'react';
-import { FileText, File } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { LoadingSpinner } from './LoadingSpinner';
 import type { Document } from '../types';
+import { apiClient } from '../utils/api';
 
-interface DocumentPreviewProps {
-  document: Document;
-}
+export function DocumentPreview() {
+  const { sessionId } = useParams();
+  const [document, setDocument] = useState<Document | null>(null);
+  const [loading, setLoading] = useState(false);
 
-export function DocumentPreview({ document }: DocumentPreviewProps) {
-  const formatFileSize = (bytes: number) => {
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    if (bytes === 0) return '0 Bytes';
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
-  };
+  useEffect(() => {
+    async function fetchDocument() {
+      if (!sessionId) return;
+      setLoading(true);
+      try {
+        // Use the same API as ChatInterface
+        const doc = await apiClient.getDocumentBySessionId(sessionId);
+        setDocument(doc);
+        console.log("Fetched document:", doc);
+      } catch (e) {
+        setDocument(null);
+        console.error("Error fetching document:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchDocument();
+  }, [sessionId]);
+
+  if (loading || !document) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <LoadingSpinner message={loading ? 'Loading document...' : 'No document loaded.'} size="md" />
+      </div>
+    );
+  }
 
   return (
-    <div className="h-full bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg rounded-2xl border border-white/20 dark:border-gray-700/50 overflow-hidden">
-      {/* Header */}
-      <div className="p-4 border-b border-white/10 dark:border-gray-700/50">
-        <div className="flex items-center space-x-3">
-          {document.type === 'pdf' ? (
-            <File className="w-6 h-6 text-red-400" />
-          ) : (
-            <FileText className="w-6 h-6 text-blue-400" />
-          )}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-white font-semibold truncate">
-              {document.name}
-            </h3>
-            <p className="text-gray-400 text-sm">
-              {formatFileSize(document.size)}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
+    <div className="bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg rounded-2xl p-6 border border-white/20 dark:border-gray-700/50 h-full">
+      <h2 className="text-xl font-semibold text-white mb-4">Document Preview</h2>
       <div className="p-4 h-full overflow-y-auto">
         {document.type === 'text' && document.content ? (
           <div className="prose prose-invert max-w-none">
@@ -49,7 +52,8 @@ export function DocumentPreview({ document }: DocumentPreviewProps) {
         ) : (
           <div className="flex items-center justify-center h-full text-center">
             <div>
-              <File className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+              {/* You can import and use an icon here if desired */}
+              <span className="w-16 h-16 inline-block mb-4 bg-gray-500 rounded-full" />
               <p className="text-gray-400">PDF preview coming soon</p>
               <p className="text-gray-500 text-sm mt-2">
                 Document uploaded successfully
