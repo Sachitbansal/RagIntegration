@@ -54,7 +54,6 @@ def analyze_image_with_context(image_path, text_context):
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    # --- Configuration ---
     # Replace with the actual path to your image file
     image_file = "RagAPINew/download.jpeg" # Example: "my_vacation_photo.png"
 
