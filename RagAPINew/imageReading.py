@@ -68,3 +68,4 @@ if __name__ == "__main__":
     # context_prompt_2 = "Identify any text present in this image and transcribe it. If there are objects, list them."
     # Make sure this image file exists, or comment out this section
     # analyze_image_with_context(image_file_2, context_prompt_2)
+    
